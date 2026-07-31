@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>| Expensy Note |</title>
     
     <link rel="manifest" href="manifest.json">
@@ -422,11 +422,44 @@
             .calculator-app .btn svg { width: 20px; height: 20px; }
         }
 
+        /* NATIVE PRINTING SETTINGS */
         @media print {
-            body { background: #ffffff !important; background-image: none !important; display: block !important; padding: 0 !important; min-height: auto !important; }
-            .app-container, .preview-modal, #cloud-sync-btn { display: none !important; }
-            #print-wrapper { position: relative !important; width: 100% !important; height: auto !important; overflow: visible !important; top: 0 !important; left: 0 !important; }
-            .print-container { display: block !important; width: 100% !important; min-height: auto !important; padding: 20px !important; }
+            @page {
+                size: A4 portrait;
+                margin: 15mm; 
+            }
+            body { 
+                background: #ffffff !important; 
+                background-image: none !important; 
+                display: block !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                min-height: auto !important; 
+            }
+            .app-container, .preview-modal, #cloud-sync-btn { 
+                display: none !important; 
+            }
+            #print-wrapper { 
+                position: static !important; 
+                width: 100% !important; 
+                height: auto !important; 
+                overflow: visible !important; 
+                top: auto !important; 
+                left: auto !important; 
+            }
+            .pdf-page { 
+                width: 100% !important; 
+                max-width: 100% !important;
+                height: auto !important;
+                min-height: 100vh !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+            .print-cover-content {
+                height: 85vh !important; 
+            }
         }
     </style>
 </head>
@@ -521,7 +554,7 @@
                     <div class="action-box">
                         <div class="calendar-wrapper" id="entry-cal-wrapper" title="Manually Select Date & Time">
                             📅
-                            <input type="datetime-local" id="entry-custom-date" class="hidden-date-input" onclick="try{this.showPicker();}catch(e){}" onchange="markCustomDate()">
+                            <input type="datetime-local" id="entry-custom-date" class="hidden-date-input" onclick="event.preventDefault(); try{this.showPicker();}catch(e){}" onchange="markCustomDate()">
                         </div>
                     </div>
 
@@ -539,7 +572,7 @@
 
             <h3 class="section-title collapsible-header" id="toggle-log-btn">
                 <div style="display: flex; align-items: center; gap: 5px;" onclick="event.stopPropagation();">
-                    <select id="month-filter" onchange="renderAllExpenses()" style="background: transparent; color: #ffffff; border: none; border-bottom: 1px dashed rgba(255,255,255,0.4); font-size: 1.1rem; font-weight: 600; font-family: 'Bookman', serif; outline: none; cursor: pointer; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); padding-bottom: 2px;">
+                    <select id="month-filter" onchange="renderAllExpenses(); autoSaveToLocalStorage();" style="background: transparent; color: #ffffff; border: none; border-bottom: 1px dashed rgba(255,255,255,0.4); font-size: 1.1rem; font-weight: 600; font-family: 'Bookman', serif; outline: none; cursor: pointer; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); padding-bottom: 2px;">
                         <option value="all" style="color: #000;">All Expenses</option>
                     </select>
                 </div>
@@ -555,6 +588,7 @@
 
         </div>
 
+        <!-- Modals -->
         <div id="statement-modal" class="preview-modal" style="display: none;">
             <div class="preview-content">
                 <h4 style="margin-top:0; font-size: 1.2rem; text-align: center;">Generate Statement</h4>
@@ -712,40 +746,10 @@
 
     </div>
 
+    <!-- The Hidden PDF Render Container -->
     <div id="print-wrapper" style="position: absolute; width: 0; height: 0; overflow: hidden; top: 0; left: -9999px;">
-        <div class="print-container" id="receipt-container" style="background: #ffffff; color: #000000; width: 794px; min-height: 1122px; padding: 60px 50px; font-family: 'Bookman', serif; box-sizing: border-box; margin: 0 auto;">
-            
-            <div style="text-align: center; font-family: Arial, sans-serif; font-weight: bold; color: #000; margin-bottom: 15px;">
-                <div style="font-size: 24px; padding-bottom: 5px;">NUTRITIOUS AGRIFUTURE BANGLADESH</div>
-                <div style="padding: 5px 0; font-size: 20px;">
-                    Dhaka Office
-                </div>
-                <div style="font-size: 22px; padding-top: 5px;">PETTY CASH REGISTER</div>
-            </div>
-            
-            <h2 id="receipt-title" style="text-align: center; margin-top: 10px; margin-bottom: 0; font-size: 1.1rem; color: #555;">Expense Receipt</h2>
-            
-            <div id="receipt-list" style="margin-top: 20px;"></div>
-            <div id="receipt-total" style="margin-top: 15px;"></div>
-            
-            <div style="margin-top: 60px; display: flex; width: 100%; justify-content: space-between; font-size: 0.75rem; text-align: left; color: #000; line-height: 1.5;">
-                <div style="flex: 1; padding-right: 15px;">
-                    Prepared by: Md. Nurulla<br>
-                    Designation: Office Assistant<br><br>
-                    Date:
-                </div>
-                <div style="flex: 1.2; padding-right: 15px;">
-                    Checked/Reviewed by:<br>
-                    Designation:<br><br>
-                    Date:
-                </div>
-                <div style="flex: 1;">
-                    Approved by:<br>
-                    Designation:<br><br>
-                    Date:
-                </div>
-            </div>
-
+        <div id="receipt-pages-container">
+            <!-- Dynamically generated A4 pages will go here -->
         </div>
     </div>
 
@@ -756,8 +760,10 @@
         let expensesArray = [];
         let budgetsArray = []; 
         let localDataVersion = 0; 
+        let lastSyncedVersion = 0; 
         let deletedSyncIds = []; 
         let globalResetTime = 0; 
+        let savedMonthFilter = null; 
         
         let currentUser = null;
         let unsubscribeSnapshot = null;
@@ -793,7 +799,12 @@
         
         function updateMonthFilterOptions() {
             const filter = document.getElementById('month-filter');
-            const currentValue = filter.value;
+            let currentValue = filter.value;
+            
+            if (savedMonthFilter !== null) {
+                currentValue = savedMonthFilter;
+                savedMonthFilter = null; 
+            }
             
             const months = new Set();
             expensesArray.forEach(item => {
@@ -1004,7 +1015,6 @@
         }
 
         function addEmptyBudgetBox() {
-            // Check if the last box is completely empty. If it is, just focus it instead of adding another.
             const lastBox = budgetsArray[budgetsArray.length - 1];
             if (lastBox && lastBox.amount === 0 && (!lastBox.val || lastBox.val.trim() === '') && (!lastBox.history || lastBox.history.length === 0)) {
                 const inputEl = document.getElementById(`input-budget-${lastBox.id}`);
@@ -1023,7 +1033,6 @@
             });
             renderBudgets();
 
-            // Automatically focus the new box
             setTimeout(() => {
                 const inputEl = document.getElementById(`input-budget-${newId}`);
                 if (inputEl) inputEl.focus();
@@ -1044,9 +1053,26 @@
         window.addEventListener('beforeunload', () => {
             autoSaveToLocalStorage(true);
         });
+
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
+            if (document.visibilityState === 'visible') {
+                if (navigator.onLine && typeof currentUser !== 'undefined' && currentUser) {
+                    firebase.firestore().enableNetwork().catch(console.error);
+                }
+            } else if (document.visibilityState === 'hidden') {
                 autoSaveToLocalStorage(true);
+            }
+        });
+
+        window.addEventListener('online', () => {
+            if (typeof currentUser !== 'undefined' && currentUser) {
+                firebase.firestore().enableNetwork().catch(console.error);
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            if (typeof currentUser !== 'undefined' && currentUser) {
+                firebase.firestore().disableNetwork().catch(console.error);
             }
         });
 
@@ -1227,6 +1253,155 @@
             document.getElementById('format-modal').style.display = 'flex';
         }
 
+        // --- PAGE RENDERER ---
+        function updateReceiptContainer() {
+            const container = document.getElementById('receipt-pages-container');
+            container.innerHTML = '';
+
+            const PAGE_WIDTH = 794;
+            const PAGE_HEIGHT = 1122;
+            const SAFE_HEIGHT = 1000; 
+
+            function createPage() {
+                const page = document.createElement('div');
+                page.className = 'pdf-page';
+                page.style.width = PAGE_WIDTH + 'px';
+                page.style.height = PAGE_HEIGHT + 'px';
+                page.style.padding = '40px 25px';
+                page.style.boxSizing = 'border-box';
+                page.style.backgroundColor = '#ffffff';
+                page.style.color = '#000000';
+                page.style.fontFamily = "'Bookman', serif";
+                page.style.position = 'relative';
+                page.style.overflow = 'hidden';
+                container.appendChild(page);
+                return page;
+            }
+
+            // PAGE 1: COVER PAGE
+            let currentPage = createPage();
+            currentPage.innerHTML = `
+                <div class="print-cover-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
+                    <div style="text-align: center; font-family: Arial, sans-serif; font-weight: bold; color: #000; margin-bottom: 15px;">
+                        <div style="font-size: 24px; padding-bottom: 5px;">NUTRITIOUS AGRIFUTURE BANGLADESH</div>
+                        <div style="padding: 5px 0; font-size: 20px;">Dhaka Office</div>
+                        <div style="font-size: 22px; padding-top: 5px;">PETTY CASH REGISTER</div>
+                    </div>
+                    <h2 style="text-align: center; margin-top: 10px; margin-bottom: 0; font-size: 1.1rem; color: #555;">Expense & Budget Receipt: ${currentDownloadRange}</h2>
+                </div>
+            `;
+
+            if (currentDownloadData.length === 0) {
+                currentPage = createPage();
+                currentPage.innerHTML = '<div style="padding: 10px 0; text-align: center; font-size: 0.85rem; color: #000;">No records found for this range.</div>';
+                return;
+            }
+
+            // PAGE 2+: CONTENT PAGES
+            currentPage = createPage();
+            let contentWrapper = document.createElement('div');
+            currentPage.appendChild(contentWrapper);
+
+            const createHeader = () => `
+                <div style="display: flex; font-weight: bold; border-bottom: 1.5px solid #000; padding-bottom: 4px; margin-bottom: 4px; font-size: 0.85rem; color: #000;">
+                    <div style="width: 40px; text-align: center;">SL</div>
+                    <div style="flex: 1; padding: 0 10px;">Description of Transactions</div>
+                    <div style="width: 100px; text-align: right;">Amount</div>
+                </div>
+            `;
+
+            contentWrapper.innerHTML = createHeader();
+
+            currentDownloadData.forEach((item, index) => {
+                const isBudget = item.type === 'budget';
+                const rowBg = isBudget ? 'background-color: rgba(52, 199, 89, 0.1);' : '';
+                const nameColor = isBudget ? 'color: #15803d;' : 'color: #000000;';
+                const amtColor = isBudget ? 'color: #15803d;' : 'color: #000000;';
+                const prefix = isBudget ? '+' : '-';
+
+                const row = document.createElement('div');
+                row.style.cssText = `display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 4px 0; ${rowBg}`;
+                row.innerHTML = `
+                    <div style="width: 40px; text-align: center; color: #333; font-size: 0.85rem;">${index + 1}</div>
+                    <div style="flex: 1; padding: 0 10px;">
+                        <div style="font-weight: bold; font-size: 0.85rem; ${nameColor} word-wrap: break-word; white-space: normal;">${item.name}</div>
+                        <div style="font-size: 0.7rem; color: #666; margin-top: 1px;">${item.timestamp}</div>
+                    </div>
+                    <div style="width: 100px; text-align: right; font-weight: bold; font-size: 0.85rem; ${amtColor}">
+                        ${prefix} ${formatMoney(item.amount)} ৳
+                    </div>
+                `;
+
+                contentWrapper.appendChild(row);
+
+                const wrapperEl = document.getElementById('print-wrapper');
+                wrapperEl.style.width = PAGE_WIDTH + 'px'; 
+
+                if (contentWrapper.offsetHeight > SAFE_HEIGHT) {
+                    contentWrapper.removeChild(row);
+                    currentPage = createPage();
+                    contentWrapper = document.createElement('div');
+                    contentWrapper.innerHTML = createHeader();
+                    contentWrapper.appendChild(row);
+                    currentPage.appendChild(contentWrapper);
+                }
+            });
+
+            const remainingBudget = currentDownloadTotalBudget - currentDownloadTotal;
+            const totalRow = document.createElement('div');
+            totalRow.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1.5px solid #000; padding-top: 8px; margin-top: 8px; color: #000;">
+                    <div style="font-size: 0.95rem; margin-right: 25px;">
+                        <span style="color: #555; font-weight: normal;">Remaining Budget:</span>
+                        <span style="font-weight: bold; margin-left: 5px;">${formatMoney(remainingBudget)} ৳</span>
+                    </div>
+                    <div style="font-size: 1.05rem; font-weight: bold;">
+                        <span>Total Expenses:</span>
+                        <span style="margin-left: 5px;">${formatMoney(currentDownloadTotal)} ৳</span>
+                    </div>
+                </div>
+            `;
+            contentWrapper.appendChild(totalRow);
+
+            if (contentWrapper.offsetHeight > SAFE_HEIGHT) {
+                contentWrapper.removeChild(totalRow);
+                currentPage = createPage();
+                contentWrapper = document.createElement('div');
+                contentWrapper.appendChild(totalRow);
+                currentPage.appendChild(contentWrapper);
+            }
+
+            const sigRow = document.createElement('div');
+            sigRow.innerHTML = `
+                <div style="margin-top: 60px; display: flex; width: 100%; justify-content: space-between; font-size: 0.75rem; text-align: left; color: #000; line-height: 1.5;">
+                    <div style="flex: 1; padding-right: 15px;">
+                        Prepared by: Md. Nurulla<br>
+                        Designation: Office Assistant<br><br>
+                        Date:
+                    </div>
+                    <div style="flex: 1.2; padding-right: 15px;">
+                        Checked/Reviewed by:<br>
+                        Designation:<br><br>
+                        Date:
+                    </div>
+                    <div style="flex: 1;">
+                        Approved by:<br>
+                        Designation:<br><br>
+                        Date:
+                    </div>
+                </div>
+            `;
+            contentWrapper.appendChild(sigRow);
+
+            if (contentWrapper.offsetHeight > SAFE_HEIGHT + 50) { 
+                contentWrapper.removeChild(sigRow);
+                currentPage = createPage();
+                contentWrapper = document.createElement('div');
+                contentWrapper.appendChild(sigRow);
+                currentPage.appendChild(contentWrapper);
+            }
+        }
+
         function executePrint() {
             if(currentDownloadData.length === 0) {
                 alert("No data to print for this range.");
@@ -1255,7 +1430,7 @@
             }, 1000);
         }
 
-        function executeDownloadPDF() {
+        async function executeDownloadPDF() {
             document.getElementById('format-modal').style.display = 'none';
             document.getElementById('action-modal').style.display = 'flex';
             
@@ -1274,39 +1449,28 @@
             wrapper.style.height = 'auto';
             wrapper.style.overflow = 'visible';
 
-            const receipt = document.getElementById('receipt-container');
-            
-            html2canvas(receipt, {scale: 2}).then(canvas => {
-                wrapper.style.width = originalWidth;
-                wrapper.style.height = originalHeight;
-                wrapper.style.overflow = originalOverflow;
+            const pages = document.querySelectorAll('.pdf-page');
+            const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
 
+            for (let i = 0; i < pages.length; i++) {
+                const canvas = await html2canvas(pages[i], {scale: 2});
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
-                const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-                
-                let heightLeft = imgHeight;
-                let position = 0;
-                
-                pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pageHeight;
-                
-                while (heightLeft > 1) { 
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-                
-                const rawBase64 = pdf.output('datauristring');
-                const filename = `Receipt_${dateStr}.pdf`;
-                
-                if (!sendToAndroidNativeDownload(rawBase64, filename)) {
-                    pdf.save(filename);
-                }
-            });
+                if (i > 0) pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            }
+
+            wrapper.style.width = originalWidth;
+            wrapper.style.height = originalHeight;
+            wrapper.style.overflow = originalOverflow;
+            
+            const rawBase64 = pdf.output('datauristring');
+            const filename = `Receipt_${dateStr}.pdf`;
+            
+            if (!sendToAndroidNativeDownload(rawBase64, filename)) {
+                pdf.save(filename);
+            }
         }
 
         function executeDownloadJPG() {
@@ -1328,7 +1492,7 @@
             wrapper.style.height = 'auto';
             wrapper.style.overflow = 'visible';
 
-            const receipt = document.getElementById('receipt-container');
+            const receipt = document.getElementById('receipt-pages-container');
             
             html2canvas(receipt, {scale: 2}).then(canvas => {
                 wrapper.style.width = originalWidth;
@@ -1345,62 +1509,6 @@
                     link.click();
                 }
             });
-        }
-
-        function updateReceiptContainer() {
-            const list = document.getElementById('receipt-list');
-            list.innerHTML = '';
-            document.getElementById('receipt-title').textContent = `Expense & Budget Receipt: ${currentDownloadRange}`;
-            
-            if (currentDownloadData.length === 0) {
-                list.innerHTML = '<div style="padding: 10px 0; text-align: center; font-size: 0.85rem;">No records found for this range.</div>';
-            } else {
-                list.innerHTML += `
-                    <div style="display: flex; font-weight: bold; border-bottom: 1.5px solid #000; padding-bottom: 4px; margin-bottom: 4px; font-size: 0.85rem;">
-                        <div style="width: 40px; text-align: center;">SL</div>
-                        <div style="width: 45px; text-align: center;">Receipt</div>
-                        <div style="flex: 1; padding: 0 10px;">Particulars</div>
-                        <div style="width: 100px; text-align: right;">Amount</div>
-                    </div>
-                `;
-
-                currentDownloadData.forEach((item, index) => {
-                    const isBudget = item.type === 'budget';
-                    const rowBg = isBudget ? 'background-color: rgba(52, 199, 89, 0.1);' : '';
-                    const nameColor = isBudget ? 'color: #15803d;' : 'color: #000000;';
-                    const amtColor = isBudget ? 'color: #15803d;' : 'color: #000000;';
-                    const prefix = isBudget ? '+' : '-';
-
-                    list.innerHTML += `
-                        <div style="display: flex; align-items: center; border-bottom: 1px solid #eee; padding: 4px 0; ${rowBg}">
-                            <div style="width: 40px; text-align: center; color: #333; font-size: 0.85rem;">${index + 1}</div>
-                            <div style="width: 45px; text-align: center; border-left: 1px solid #ddd; border-right: 1px solid #ddd; height: 100%; min-height: 18px;"></div>
-                            <div style="flex: 1; padding: 0 10px;">
-                                <div style="font-weight: bold; font-size: 0.85rem; ${nameColor} word-wrap: break-word; white-space: normal;">${item.name}</div>
-                                <div style="font-size: 0.7rem; color: #666; margin-top: 1px;">${item.timestamp}</div>
-                            </div>
-                            <div style="width: 100px; text-align: right; font-weight: bold; font-size: 0.85rem; ${amtColor}">
-                                ${prefix} ${formatMoney(item.amount)} ৳
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-            
-            const remainingBudget = currentDownloadTotalBudget - currentDownloadTotal;
-
-            document.getElementById('receipt-total').innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1.5px solid #000; padding-top: 8px; margin-top: 8px;">
-                    <div style="font-size: 0.95rem; margin-right: 25px;">
-                        <span style="color: #555; font-weight: normal;">Remaining Budget:</span>
-                        <span style="font-weight: bold; margin-left: 5px; color: #000;">${formatMoney(remainingBudget)} ৳</span>
-                    </div>
-                    <div style="font-size: 1.05rem; font-weight: bold;">
-                        <span style="color: #000;">Total Expenses:</span>
-                        <span style="margin-left: 5px; color: #000;">${formatMoney(currentDownloadTotal)} ৳</span>
-                    </div>
-                </div>
-            `;
         }
 
         function formatInputField(inputElement) {
@@ -1654,7 +1762,7 @@
                             </button>
                             <div class="calendar-wrapper" title="Change Date & Time">
                                 📅
-                                <input type="datetime-local" class="hidden-date-input" onclick="try{this.showPicker();}catch(e){}" onchange="editDate('${item.id}', this.value)">
+                                <input type="datetime-local" class="hidden-date-input" onclick="event.preventDefault(); try{this.showPicker();}catch(e){}" onchange="editDate('${item.id}', this.value)">
                             </div>
                             <button class="icon-btn" onclick="deleteExpense('${item.id}')" title="Delete Entry">
                                 <svg class="custom-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1754,7 +1862,8 @@
                 globalResetTime, 
                 draftName: expenseName.value,
                 draftAmount: expenseAmount.value,
-                draftDate: entryCustomDate.value
+                draftDate: entryCustomDate.value,
+                selectedMonthFilter: document.getElementById('month-filter').value 
             }));
             
             if (window.history && window.history.replaceState) {
@@ -1795,6 +1904,8 @@
                     expenseAmount.value = data.draftAmount || '';
                     entryCustomDate.value = data.draftDate || '';
                     markCustomDate(true); 
+
+                    savedMonthFilter = data.selectedMonthFilter || 'all'; 
 
                     expensesArray = Array.isArray(data.expensesArray) ? data.expensesArray : [];
                     
@@ -1842,6 +1953,7 @@
                 expenseAmount.value = '';
                 entryCustomDate.value = '';
                 markCustomDate(true); 
+                document.getElementById('month-filter').value = 'all'; 
                 
                 renderBudgets();
                 updateMonthFilterOptions(); 
@@ -1888,11 +2000,17 @@
                         expensesArray = [];
                         budgetsArray = [{ id: Date.now(), amount: 0, val: '', timestamp: '', entryTime: 0, history: [] }];
                         localDataVersion = 0; 
+                        lastSyncedVersion = 0; 
+                        
+                        deletedSyncIds = []; 
+                        globalResetTime = 0; 
+                        currentEditingId = null;
                         
                         expenseName.value = '';
                         expenseAmount.value = '';
                         entryCustomDate.value = '';
                         markCustomDate(true);
+                        document.getElementById('month-filter').value = 'all'; 
                         
                         renderBudgets();
                         updateMonthFilterOptions(); 
@@ -1948,10 +2066,12 @@
             window.syncToCloud = function(immediate = false) {
                 if (!currentUser) return;
                 
-                const isLocalEmpty = expensesArray.length === 0 && budgetsArray.reduce((sum, b) => sum + b.amount, 0) === 0;
-                
-                if (isLocalEmpty && !isCloudSynced && !window.isResetting) {
+                if (!isCloudSynced && !window.isResetting) {
                     return; 
+                }
+
+                if (localDataVersion <= lastSyncedVersion && !window.isResetting) {
+                    return;
                 }
                 
                 const pushData = () => {
@@ -1967,6 +2087,7 @@
                     db.collection('userData').doc(currentUser.uid).set(dataToSave, {merge: true})
                       .then(() => {
                           window.isResetting = false; 
+                          lastSyncedVersion = localDataVersion; 
                       })
                       .catch(e => {
                           console.log("Cloud sync error", e);
@@ -1986,18 +2107,17 @@
             function loadFromCloud() {
                 if (!currentUser) return;
                 
-                unsubscribeSnapshot = db.collection('userData').doc(currentUser.uid).onSnapshot(doc => {
+                unsubscribeSnapshot = db.collection('userData').doc(currentUser.uid).onSnapshot({ includeMetadataChanges: true }, doc => {
                     if (window.isResetting) return; 
-                    if (doc.metadata.hasPendingWrites) return;
 
                     if (doc.exists) {
                         isCloudSynced = true; 
                         const data = doc.data();
                         
+                        lastSyncedVersion = data.localDataVersion || 0; 
                         const cloudResetTime = data.globalResetTime || 0;
                         const cloudDeletedIds = data.deletedSyncIds || [];
 
-                        // 1. Handle Global "Erase All" Priority
                         if (cloudResetTime > globalResetTime) {
                             expensesArray = [];
                             budgetsArray = [{ id: Date.now(), amount: 0, val: '', timestamp: '', entryTime: 0, history: [] }];
@@ -2013,17 +2133,14 @@
                             return;
                         }
 
-                        // 2. Merge Deleted IDs from both devices
                         deletedSyncIds = [...new Set([...deletedSyncIds, ...cloudDeletedIds])];
 
-                        // Detect actively edited budget
                         const activeEl = document.activeElement;
                         let activeBudgetId = null;
                         if (activeEl && activeEl.classList.contains('input-budget-dynamic')) {
                             activeBudgetId = activeEl.id.replace('input-budget-', '');
                         }
 
-                        // 3. Smart Merge Expenses Array
                         const cloudExpenses = Array.isArray(data.expensesArray) ? data.expensesArray : [];
                         const mergedExpensesMap = new Map();
 
@@ -2040,8 +2157,16 @@
 
                         const newExpensesArray = Array.from(mergedExpensesMap.values()).sort((a, b) => a.entryTime - b.entryTime);
 
-                        // 4. Smart Merge Budgets Array
                         const cloudBudgets = Array.isArray(data.budgetsArray) ? data.budgetsArray : [];
+
+                        if (cloudBudgets.length > 0 && budgetsArray.length === 1) {
+                            const fb = budgetsArray[0];
+                            const isFbEmpty = fb.amount === 0 && (!fb.val || fb.val.trim() === '') && (!fb.history || fb.history.length === 0);
+                            if (isFbEmpty && String(fb.id) !== activeBudgetId) {
+                                budgetsArray = [];
+                            }
+                        }
+
                         const mergedBudgetsMap = new Map();
 
                         budgetsArray.forEach(b => {
@@ -2059,7 +2184,6 @@
 
                         let rawMergedBudgets = Array.from(mergedBudgetsMap.values());
                         
-                        // NEW FIX: Separate real budgets from completely empty ones
                         const isEmptyBox = (b) => (b.amount === 0 && (!b.val || b.val.trim() === '') && (!b.history || b.history.length === 0));
                         
                         let realBudgets = [];
@@ -2072,14 +2196,19 @@
 
                         let finalBudgets = [...realBudgets];
 
-                        // Keep only ONE blank box to prevent stacking
                         if (blankBudgets.length > 0) {
                             let keptBlank = blankBudgets.find(b => String(b.id) === activeBudgetId);
+                            
                             if (!keptBlank) {
-                                blankBudgets.sort((a, b) => b.entryTime - a.entryTime);
-                                keptBlank = blankBudgets[0]; // Keep the most recently generated one
+                                keptBlank = blankBudgets.find(b => (Date.now() - (b.entryTime || 0)) < 5000);
                             }
-                            finalBudgets.push(keptBlank);
+
+                            if (keptBlank) {
+                                finalBudgets.push(keptBlank);
+                            } else if (realBudgets.length === 0) {
+                                blankBudgets.sort((a, b) => (b.entryTime || 0) - (a.entryTime || 0));
+                                finalBudgets.push(blankBudgets[0]);
+                            }
                         }
 
                         if (finalBudgets.length === 0) {
@@ -2092,42 +2221,48 @@
 
                         let newBudgetsArray = finalBudgets.sort((a, b) => a.entryTime - b.entryTime);
 
-                        // 5. Check if merging caused changes to trigger UI updates
                         const dataChanged = (JSON.stringify(expensesArray) !== JSON.stringify(newExpensesArray)) || 
                                             (JSON.stringify(budgetsArray) !== JSON.stringify(newBudgetsArray));
 
                         expensesArray = newExpensesArray;
                         budgetsArray = newBudgetsArray;
+                        
                         localDataVersion = Math.max(localDataVersion, data.localDataVersion || 0);
 
                         if (dataChanged) {
                             const activeElCheck = document.activeElement;
                             const isBudgetTyping = activeElCheck && activeElCheck.classList.contains('input-budget-dynamic');
+                            const isDatePickerActive = activeElCheck && activeElCheck.classList.contains('hidden-date-input');
                             
                             if (!isBudgetTyping) {
                                 renderBudgets();
                             }
                             
                             updateMonthFilterOptions();
-                            renderAllExpenses();
+                            
+                            if (!isDatePickerActive) {
+                                renderAllExpenses();
+                            }
+                            
                             updateAppCalculations();
                         }
 
                         autoSaveToLocalStorage();
 
-                        if (expensesArray.length > cloudExpenses.length || budgetsArray.length > cloudBudgets.length || deletedSyncIds.length > cloudDeletedIds.length) {
+                        if (localDataVersion > lastSyncedVersion || expensesArray.length > cloudExpenses.length || budgetsArray.length > cloudBudgets.length || deletedSyncIds.length > cloudDeletedIds.length) {
                             window.syncToCloud(true);
                         }
 
                     } else {
-                        isCloudSynced = true;
-                        window.syncToCloud(true);
+                        if (!doc.metadata.fromCache) {
+                            isCloudSynced = true;
+                            window.syncToCloud(true);
+                        }
                     }
                 });
             }
         }
 
-        // CALCULATOR LOGIC
         let currentExpression = "";
         let currentResult = "";
         let isCalculated = false; 
