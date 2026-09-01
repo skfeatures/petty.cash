@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "petty.skfeatures.github.twa",
+        "sha256_cert_fingerprints": ["A8:89:C3:CD:B8:0F:DD:66:5A:0A:F2:9A:8A:12:2F:A4:09:85:18:E5:47:25:95:0B:D2:BA:99:7F:9C:42:00:82"]
+      }
+    }]
