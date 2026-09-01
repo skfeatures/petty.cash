@@ -1,8 +1,0 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "naf-pettycash.netlify.app",
-        "sha256_cert_fingerprints": ["C0:0C:F0:A3:99:E8:EE:C6:1E:8E:F0:7F:B3:15:88:2B:D4:BE:2D:E4:29:E1:50:EA:89:02:EF:6C:7D:2E:22:C8"]
-      }
-    }]
