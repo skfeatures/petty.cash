@@ -4,7 +4,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js
 importScripts('https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js');
 
 // 2. Cache Versioning 
-const CACHE_NAME = 'budget-store-v2'; 
+const CACHE_NAME = 'budget-store-v3'; 
 
 // 3. Add your exact Firebase config
 const firebaseConfig = {
