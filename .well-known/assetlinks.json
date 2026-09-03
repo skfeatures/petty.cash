@@ -1,8 +1,18 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "io.github.skfeatures.twa",
-        "sha256_cert_fingerprints": ["15:E9:11:C2:B6:84:A6:63:2B:3F:D9:FC:1F:0F:10:8C:FE:E2:BD:F6:83:85:68:0D:AF:9F:BD:FC:C0:C4:41:F3"]
-      }
-    }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.skfeatures.twa",
+      "sha256_cert_fingerprints": ["15:E9:11:C2:B6:84:A6:63:2B:3F:D9:FC:1F:0F:10:8C:FE:E2:BD:F6:83:85:68:0D:AF:9F:BD:FC:C0:C4:41:F3"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "skfeatures.github.io.twa",
+      "sha256_cert_fingerprints": ["50:66:91:F6:0E:92:C2:14:DC:BD:26:AC:6A:2D:89:85:35:CE:F6:00:6D:0A:E7:9A:DA:79:A9:DC:C1:1D:19:EB"]
+    }
+  }
+]
